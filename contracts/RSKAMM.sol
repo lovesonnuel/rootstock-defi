@@ -31,7 +31,7 @@ contract RSKAMM is ReentrancyGuard {
         tokenB = IERC20(_tokenB);
     }
 
-    function addLiquidity(uint256 amountADesired, uint256 amountBDesired) 
+    function addLiquidity(uint256 amountADesired, uint256 amountBDesired, uint256 minLiquidity) 
         external 
         nonReentrant 
         returns (uint256 liquidity) 
@@ -58,6 +58,8 @@ contract RSKAMM is ReentrancyGuard {
             }
             liquidity = _min((amountA * totalLiquidity) / reserveA, (amountB * totalLiquidity) / reserveB);
         }
+
+        require(liquidity >= minLiquidity, "Insufficient liquidity received");
 
         tokenA.safeTransferFrom(msg.sender, address(this), amountA);
         tokenB.safeTransferFrom(msg.sender, address(this), amountB);

@@ -43,7 +43,7 @@ async function main() {
   await tokenA.write.approve([rskAMM.address, liquidityAmountA]);
   await tokenB.write.approve([rskAMM.address, liquidityAmountB]);
 
-  await rskAMM.write.addLiquidity([liquidityAmountA, liquidityAmountB]);
+  await rskAMM.write.addLiquidity([liquidityAmountA, liquidityAmountB, 0n]);
   console.log("Initial liquidity added: 1000 RTKA, 2000 RTKB");
 
   const [reserveA, reserveB, totalLiquidity] = await Promise.all([

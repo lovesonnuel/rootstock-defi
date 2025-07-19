@@ -44,7 +44,8 @@ describe("RSKAMM", function () {
 
     await amm.write.addLiquidity([
       parseEther("100"),
-      parseEther("200")
+      parseEther("200"),
+      0n // minLiquidity = 0 for testing
     ], {
       account: user1.account,
     });
@@ -82,7 +83,8 @@ describe("RSKAMM", function () {
 
       await amm.write.addLiquidity([
         parseEther("100"),
-        parseEther("200")
+        parseEther("200"),
+        0n // minLiquidity = 0 for testing
       ], {
         account: user1.account,
       });
@@ -91,6 +93,28 @@ describe("RSKAMM", function () {
       expect(await amm.read.reserveB()).to.equal(parseEther("200"));
       const liquidity = await amm.read.liquidityOf([user1.account.address]) as bigint;
       expect(liquidity > 0n).to.be.true;
+    });
+
+    it("Should respect slippage protection", async function () {
+      const { amm, tokenA, tokenB, user1 } = await loadFixture(deployAMMFixture);
+
+      await tokenA.write.approve([amm.address, parseEther("100")], {
+        account: user1.account,
+      });
+      await tokenB.write.approve([amm.address, parseEther("200")], {
+        account: user1.account,
+      });
+
+      // This should fail due to unrealistic minLiquidity expectation
+      await expect(
+        amm.write.addLiquidity([
+          parseEther("100"),
+          parseEther("200"),
+          parseEther("1000000") // Unrealistically high minLiquidity
+        ], {
+          account: user1.account,
+        })
+      ).to.be.rejectedWith("Insufficient liquidity received");
     });
   });
 
